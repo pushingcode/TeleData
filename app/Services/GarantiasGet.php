@@ -14,11 +14,17 @@ final class GarantiasGet extends Core
 
     public function __construct()
     {
-        $this->em = parent::makeEntityManager();
+        if (!isset($this->em)) {
+            $this->em = parent::makeEntityManager();
+        }
     }
 
     public function showRecordByID( int $id )
     {
+        if (!isset($this->em)) {
+            $this->em = parent::makeEntityManager();
+        }
+
         $query = $this->em->find('Entity\Entity\Garantia',$id);
         $query_a_o = Carbon::instance($query->getCreated());
         $query_a = [
@@ -30,6 +36,10 @@ final class GarantiasGet extends Core
 
     public function searchRecordByDate( array $dates )
     {
+        if (!isset($this->em)) {
+            $this->em = parent::makeEntityManager();
+        }
+        
         $start = $dates[0];
         $start = Carbon::parse($start)->toDateTime();
 

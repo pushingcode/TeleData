@@ -19,31 +19,43 @@ class AppCoreServices
     {
         
         require_once(__DIR__ .'/../bootstrap.php');
-        AppLogServices::logEvent(__FUNCTION__,'Se ha creado un EntityManager', [], 100);
+        AppLogServices::logEvent(__FUNCTION__,'Se ha creado un EntityManager', ["_ID"=>self::setIdWork()], 100);
         return $em;
+    }
+
+    public static function setIdWork()
+    {
+         
+        if (!isset($workID)) {
+            $mark = (string) time();
+            $workID = md5($mark);
+        }
+
+        return $workID;
     }
 
     public static function getApp()
     {
 
         try {
-            if (file_exists(self::FILE_CONF)) {
-                $get_data = file_get_contents(self::FILE_CONF);
-            } else {
+
+            if (!file_exists(self::FILE_CONF)) {
                 throw new Exception("El archivo no existe", 600);
-                
             }
+
+            $get_data = file_get_contents(self::FILE_CONF);
             $data = json_decode($get_data, true);
+
         } catch (\Exception $e) {
             //throw $th;
             $data = [];
 
-            AppLogServices::logEvent(__FUNCTION__,$e->getMessage(), ["El archivo no existe: "=> self::FILE_CONF], $e->getCode());
+            AppLogServices::logEvent(__FUNCTION__,$e->getMessage(), ["_ID"=>self::setIdWork(), "El archivo no existe: "=> self::FILE_CONF], $e->getCode());
 
         } catch (JsonException $j){
             $data = [];
 
-            AppLogServices::logEvent(__FUNCTION__,$j->getMessage(), ["JSON Error: "=> "Parsing Error"], $j->getCode());
+            AppLogServices::logEvent(__FUNCTION__,$j->getMessage(), ["_ID"=>self::setIdWork(), "JSON Error: "=> "Parsing Error"], $j->getCode());
         }
 
         return $data;
@@ -77,7 +89,7 @@ class AppCoreServices
             }
         } catch (\Exception $e) {
             $data_paths = "";
-            AppLogServices::logEvent(__FUNCTION__,$e->getMessage(), ["ruta solicitada: "=>$path], 400);
+            AppLogServices::logEvent(__FUNCTION__,$e->getMessage(), ["_ID"=>self::setIdWork(), "ruta solicitada: "=>$path], 400);
         }
 
         return $data_paths;
