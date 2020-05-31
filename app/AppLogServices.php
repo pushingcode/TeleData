@@ -7,9 +7,11 @@ namespace App;
 use Monolog\Logger;
 use Monolog\Handler\FirePHPHandler;
 use Monolog\Handler\StreamHandler;
+use App\AppCoreServices;
 
-class AppLogServices
+class AppLogServices extends AppCoreServices
 {
+
     /**
      * logEvent() Ejecuta el servicio de logging
      * DEBUG (100)
@@ -29,12 +31,50 @@ class AppLogServices
      */
     public static function logEvent($services, $event, $payload, $level)
     {
+        switch ($level) {
+            case 100:
+                $level = "debug";
+                $n_level = 100;
+                break;
+            case 200:
+                $level = "info";
+                $n_level = 200;
+                break;
+            case 250:
+                $level = "notice";
+                $n_level = 250;
+                break;
+            case 300:
+                $level = "warning";
+                $n_level = 300;
+                break;
+            case 400:
+                $level = "error";
+                $n_level = 400;
+                break;
+            case 500:
+                $level = "critical";
+                $n_level = 500;
+                break;
+            case 550:
+                $level = "alert";
+                $n_level = 550;
+                break;
+            case 600:
+                $level = "emergency";
+                $n_level = 600;
+                break;
+            default:
+                $level = "info";
+                $n_level = 200;
+                break;
+        }
         $logger = new Logger($services);
 
-        $logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/services.log', $level));
+        $logger->pushHandler(new StreamHandler(__DIR__ . '/..' . parent::pathsData('Logs').'/services.log', $n_level));
         $logger->pushHandler(new FirePHPHandler());
         
-        $logger->info($event, $payload);
+        $logger->{$level}($event, $payload);
     }
 
 }
