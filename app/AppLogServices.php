@@ -13,7 +13,8 @@ class AppLogServices extends AppCoreServices
 {
 
     /**
-     * logEvent() Ejecuta el servicio de logging
+     * Ejecuta el servicio de logging
+     * 
      * DEBUG (100)
      * INFO (200)
      * NOTICE (250)

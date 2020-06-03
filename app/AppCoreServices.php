@@ -8,6 +8,16 @@ use App\AppLogServices;
 use Exception;
 use JsonException;
 
+/**
+ * Servicios de aplicacion
+ *
+ * @property array $data_DB
+ * 
+ * @method Doctrine\ORM\EntityManager makeEntityManager()
+ * @method string setIdWork()
+ * @method array getApp()
+ * @method string dbData()
+ */
 class AppCoreServices 
 {
 

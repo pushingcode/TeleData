@@ -21,10 +21,6 @@ final class GarantiasGet extends Core
 
     public function showRecordByID( int $id )
     {
-        if (!isset($this->em)) {
-            $this->em = parent::makeEntityManager();
-        }
-
         $query = $this->em->find('Entity\Entity\Garantia',$id);
         $query_a_o = Carbon::instance($query->getCreated());
         $query_a = [
@@ -35,11 +31,7 @@ final class GarantiasGet extends Core
     }
 
     public function searchRecordByDate( array $dates )
-    {
-        if (!isset($this->em)) {
-            $this->em = parent::makeEntityManager();
-        }
-        
+    {        
         $start = $dates[0];
         $start = Carbon::parse($start)->toDateTime();
 
@@ -48,12 +40,12 @@ final class GarantiasGet extends Core
 
         $rsm = new ResultSetMapping;
         $rsm->addEntityResult('Entity\Entity\Garantia','g');
-        $rsm->addFieldResult('g','id','id');
-        $rsm->addFieldResult('g','contract','contract');
-        $rsm->addFieldResult('g','created_at','created');
+        $rsm->addFieldResult('g','id','id'); //@Entity, @Column, @Field
+        $rsm->addFieldResult('g','contract','contract'); //@Entity, @Column, @Field
+        $rsm->addFieldResult('g','created_at','created'); //@Entity, @Column, @Field
 
         $sql = "SELECT * FROM garantias WHERE created_at BETWEEN ? AND ?";
-        $query = $this->em->createNativeQuery($sql,$rsm);
+        $query = $this->em->createNativeQuery($sql, $rsm);
         $query->setParameter(1, $start);
         $query->setParameter(2, $end);
 

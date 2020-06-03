@@ -13,6 +13,7 @@ use Exception;
 
 final class GarantiasInsert extends Core
 {
+    private $work_id;
     public $em;
 
     public function __construct()
@@ -21,6 +22,8 @@ final class GarantiasInsert extends Core
         if (!isset($this->em)) {
             $this->em = parent::makeEntityManager();
         }
+
+        $this->work_id = parent::setIdWork();
         
     }
 
@@ -42,24 +45,24 @@ final class GarantiasInsert extends Core
 
                 $this->em->persist($garantia);
 
-                if(($key % $batch_size)==0){
+                if(($key % $batch_size) == 0){
                     $this->em->flush();
                     $this->em->clear();
-                    AppLogServices::logEvent(__FUNCTION__,'Batch ejecutado ' . $key, ['BATCH_ID'=> parent::setIdWork(), 'CONTRACT'=>$value], 100);
+                    AppLogServices::logEvent(__FUNCTION__,'Batch ejecutado ' . $key, ['BATCH_ID'=> $this->work_id, 'CONTRACT'=>$value], 100);
                 }
             }
 
             $this->em->flush();
             $this->em->clear();
             $salida = $garantia->getId();
-            AppLogServices::logEvent(__FUNCTION__,'End Batch ' . $key, ['BATCH_ID' => parent::setIdWork(), 'CONTRACT' => $value, 'lastID' => $salida], 100);
+            AppLogServices::logEvent(__FUNCTION__,'End Batch ' . $key, ['BATCH_ID' => $this->work_id, 'CONTRACT' => $value, 'lastID' => $salida], 100);
             
         } catch (Exception $dep) {
-            AppLogServices::logEvent(__FUNCTION__, $dep->getMessage(), ['_ID' => parent::setIdWork()], $dep->getCode());
+            AppLogServices::logEvent(__FUNCTION__, $dep->getMessage(), ['_ID' => $this->work_id], $dep->getCode());
             $salida = 0;
         } catch (ORMException $e) {
             throw $e;
-            AppLogServices::logEvent(__FUNCTION__,'ORMException', ['_ID' => parent::setIdWork(), "ACTION" => "PERSIST", "Internal" => $e], 550);
+            AppLogServices::logEvent(__FUNCTION__,'ORMException', ['_ID' => $this->work_id, "ACTION" => "PERSIST", "Internal" => $e], 550);
             $salida = 0;
         }
         
