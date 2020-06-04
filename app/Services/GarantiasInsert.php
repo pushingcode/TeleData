@@ -15,6 +15,7 @@ final class GarantiasInsert extends Core
 {
     private $work_id;
     public $em;
+    public $batch_size;
 
     public function __construct()
     {
@@ -24,14 +25,22 @@ final class GarantiasInsert extends Core
         }
 
         $this->work_id = parent::setIdWork();
+
+        $data_app = $this->appData('values');
+        $this->batch_size = $data_app['batch'];
         
     }
 
-    public function createRecord( array $garantias_contract, int $batch_size)
+    public function createRecord( array $garantias_contract, int $batch_size = null )
     {
         $dateTime = Carbon::now()->toDateTime();
 
         try {
+
+            if ($batch_size == null) {
+                $batch_size = $this->batch_size;
+                AppLogServices::logEvent(__FUNCTION__,'Tamaño del Batch por defecto', ['BATCH_ID'=> $this->work_id, 'BATCH_SIZE'=>$batch_size], 100);
+            }
 
             if ($batch_size >= 100) {
                 throw new Exception("Advertencia de Ejecucion,", 300);
@@ -43,6 +52,7 @@ final class GarantiasInsert extends Core
                 $garantia->setContract($value);
                 $garantia->setCreated($dateTime);
 
+                
                 $this->em->persist($garantia);
 
                 if(($key % $batch_size) == 0){
@@ -62,7 +72,7 @@ final class GarantiasInsert extends Core
             $salida = 0;
         } catch (ORMException $e) {
             throw $e;
-            AppLogServices::logEvent(__FUNCTION__,'ORMException', ['_ID' => $this->work_id, "ACTION" => "PERSIST", "Internal" => $e], 550);
+            AppLogServices::logEvent(__FUNCTION__,'ORMException', ['_ID' => $this->work_id, "ACTION" => "PERSIST", "Internal" => $e->getMessage()], 550);
             $salida = 0;
         }
         

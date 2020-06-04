@@ -19,8 +19,9 @@ final class Test extends TestCase
             $new_garantia[] = (string)rand(200,600);
         }
 
-        $exwcute = $waranty->createRecord($new_garantia, 20);
+        $exwcute = $waranty->createRecord($new_garantia, null);
         var_dump($exwcute);
         $this->assertIsInt($exwcute);
+        $this->assertGreaterThan(1, $exwcute);
     }
 }

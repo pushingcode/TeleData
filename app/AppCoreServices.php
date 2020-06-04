@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace App;
 
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager; 
 use App\AppLogServices;
 use Exception;
 use JsonException;
@@ -16,7 +18,7 @@ use JsonException;
  * @method Doctrine\ORM\EntityManager makeEntityManager()
  * @method string setIdWork()
  * @method array getApp()
- * @method string dbData()
+ * @method string appData()
  */
 class AppCoreServices 
 {
@@ -27,9 +29,29 @@ class AppCoreServices
 
     public static function makeEntityManager()
     {
+        $ruta = [__DIR__ . "" .self::pathsData('Entity')];
+        $modo = false;
+        $mysql = self::appData('db');
+
+        $configuracion = Setup::createAnnotationMetadataConfiguration($ruta, $modo, null, null, false);
+        $em = EntityManager::create($mysql,$configuracion);
+
+        try {
+
+            if(!$em){
+                throw new Exception("Fallo la conexion con el servidor", 600);
+            }
+
+            AppLogServices::logEvent(__FUNCTION__,'Se ha creado un EntityManager', ["_ID"=>self::setIdWork()], 100);
+            
+        } catch (\Throwable $th) {
+            AppLogServices::logEvent(__FUNCTION__,'EntityManager se ha cerrado', [
+                "_ID"                       => self::setIdWork(),
+                "TRACE_INTERNAT_MESSAGE"    => $th->getMessage(),
+                "TRACE_INTERNAT_CODE"       => $th->getCode()
+            ], 400);
+        }
         
-        require_once(__DIR__ .'/../bootstrap.php');
-        AppLogServices::logEvent(__FUNCTION__,'Se ha creado un EntityManager', ["_ID"=>self::setIdWork()], 100);
         return $em;
     }
 
@@ -71,11 +93,16 @@ class AppCoreServices
         return $data;
     }
 
-    public function dbData()
+    /**
+     * Extrae los valores de configuracion
+     * @param string $conf
+     * @return mixed
+     */
+    public static function appData(string $conf)
     {
         $data = self::getApp();
-        $this->data_DB = $data['db'];
-        return $this->data_DB;
+        $data_conf = $data[$conf];
+        return $data_conf;
     }
 
     public static function pathsData( string $path = null )

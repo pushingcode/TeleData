@@ -13,7 +13,7 @@ final class CoreTest extends TestCase
     public function testCoreAppDbData()
     {
         $data = new AppCoreServices();
-        $testSalida_db = $data->dbData();
+        $testSalida_db = $data->appData('db');
         var_dump($testSalida_db);
         $this->assertIsArray($testSalida_db);
     }
