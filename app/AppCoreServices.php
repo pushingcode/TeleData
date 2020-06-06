@@ -29,26 +29,27 @@ class AppCoreServices
 
     public static function makeEntityManager()
     {
-        $ruta = [__DIR__ . "" .self::pathsData('Entity')];
-        $modo = false;
-        $mysql = self::appData('db');
-
-        $configuracion = Setup::createAnnotationMetadataConfiguration($ruta, $modo, null, null, false);
-        $em = EntityManager::create($mysql,$configuracion);
-
+       
         try {
+            
+            $ruta = [__DIR__ . "" .self::pathsData('Entity')];
+            $modo = false;
+            $mysql = self::appData('db');
 
-            if(!$em){
-                throw new Exception("Fallo la conexion con el servidor", 600);
+            $configuracion = Setup::createAnnotationMetadataConfiguration($ruta, $modo, null, null, false);
+            $em = EntityManager::create($mysql,$configuracion);
+
+            if($em->getConnection()->ping() == false){
+                throw new Exception("Fallo al crear el EntityManager ", 600);
             }
 
-            AppLogServices::logEvent(__FUNCTION__,'Se ha creado un EntityManager', ["_ID"=>self::setIdWork()], 100);
+            AppLogServices::logEvent(__FUNCTION__,'Se ha creado un EntityManager', ["_ID"=>self::setIdWork()], 250);
             
-        } catch (\Throwable $th) {
-            AppLogServices::logEvent(__FUNCTION__,'EntityManager se ha cerrado', [
+        } catch (Exception $th) {
+            AppLogServices::logEvent(__FUNCTION__, $th->getMessage(), [
                 "_ID"                       => self::setIdWork(),
-                "TRACE_INTERNAT_MESSAGE"    => $th->getMessage(),
-                "TRACE_INTERNAT_CODE"       => $th->getCode()
+                "TRACE_INTERNAL_MESSAGE"    => $th->getMessage(),
+                "TRACE_INTERNAL_CODE"       => $th->getCode()
             ], 400);
         }
         
@@ -84,10 +85,6 @@ class AppCoreServices
 
             AppLogServices::logEvent(__FUNCTION__,$e->getMessage(), ["_ID"=>self::setIdWork(), "El archivo no existe: "=> self::FILE_CONF], $e->getCode());
 
-        } catch (JsonException $j){
-            $data = [];
-
-            AppLogServices::logEvent(__FUNCTION__,$j->getMessage(), ["_ID"=>self::setIdWork(), "JSON Error: "=> "Parsing Error"], $j->getCode());
         }
 
         return $data;
